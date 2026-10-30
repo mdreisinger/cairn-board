@@ -1,6 +1,6 @@
 import { LANES, buildCards, planAddTodo, planMove, todayLocal, addDays } from "./model.js";
 import { Board } from "./board.js";
-import { BoardError, explain } from "./errors.js";
+import { BoardError, explain, notSaved } from "./errors.js";
 import { GitHubBackend } from "./backends/github.js";
 import { DryRunBackend } from "./backends/dryrun.js";
 import { loadSettings, saveSettings, clearSettings, validSettings } from "./store.js";
@@ -142,10 +142,10 @@ async function run(intent) {
     if (e instanceof BoardError && e.kind === "secret") {
       setStatus({ kind: "refused", text: e.message });
     } else if (e instanceof BoardError && e.kind === "conflict") {
-      setStatus({ kind: "error", text: "Not saved. " + e.message + " Nothing was changed.", retry: () => retry(intent) });
+      setStatus({ kind: "error", text: notSaved(e), retry: () => retry(intent) });
     } else {
       const retryable = e instanceof BoardError && ["network", "api"].includes(e.kind);
-      setStatus({ kind: "error", text: "Not saved. " + explain(e), retry: retryable ? () => retry(intent) : null });
+      setStatus({ kind: "error", text: notSaved(e), retry: retryable ? () => retry(intent) : null });
     }
     render();
   }
@@ -166,7 +166,7 @@ async function retry(intent) {
       }
     }
   } catch (e) {
-    setStatus({ kind: "error", text: "Not saved. " + explain(e), retry: () => retry(intent) });
+    setStatus({ kind: "error", text: notSaved(e), retry: () => retry(intent) });
     return render();
   }
   render();

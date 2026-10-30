@@ -137,8 +137,7 @@ export function generateIndex(files) {
   const names = entries
     .map(([p]) => p)
     .filter((p) => /^streams\/[^/]+\.md$/.test(p))
-    .map((p) => p.slice("streams/".length))
-    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)); // sorted(os.listdir()) sorts filenames with .md
+    .map((p) => p.slice("streams/".length));
   const get = (p) => (files instanceof Map ? files.get(p) : files[p]);
   const rows = [];
   for (const fn of names) {
@@ -155,8 +154,8 @@ export function generateIndex(files) {
     const body = `${state} → ${nxt}`.replaceAll("|", "/");
     rows.push([fn.slice(0, -3), m[1], m[2], body]);
   }
-  // Stable sort by updated, newest first; ties keep filename order.
-  rows.sort((a, b) => (a[2] < b[2] ? 1 : a[2] > b[2] ? -1 : 0));
+  // lint.py sorts by (updated, slug) and then stably by updated, newest first: so newest date first, ties by slug.
+  rows.sort((a, b) => (a[2] < b[2] ? 1 : a[2] > b[2] ? -1 : a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
   const out = [...INDEX_HEADER];
   for (const [slug, status, upd, body] of rows) {
     out.push(`| [${slug}](streams/${slug}.md) | ${status} | ${upd} | ${body} |`);
