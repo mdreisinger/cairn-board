@@ -53,7 +53,11 @@ export function runLint(root) {
 
 const J = (a) => a.join("");
 // Secret shapes are assembled at runtime so no source file holds one.
+const UUID_A = J(["3f2b8c1e", "-9a4d-", "4e7b-", "8c11-", "2d5f6a7b8c9d"]);
+const UUID_B = J(["0a1b2c3d", "-4567-", "89ab-", "cdef-", "012345678901"]);
 export const POSITIVES = [
+  ["policy-number", "- 2026-10-30 10:00 · " + UUID_A + " · cloud · \"renters quote\" → insurance-renters-auto — compared policy " + J(["COA", "323", "309"])],
+  ["traveller-number", "KTN " + UUID_B + " " + J(["TT", "1234567"]) + "9"],
   ["aws-access-key", J(["AK", "IA", "ABCDEFGH", "IJKLMNOP"])],
   ["github-token", J(["gh", "p_", "a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6q7R8"])],
   ["github-fine-grained-token", J(["github", "_pat_", "11AAAAAAA0abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGH"])],
@@ -73,6 +77,9 @@ export const POSITIVES = [
   ["recovery-code", J(["recovery", " code: "]) + "48215930"],
 ];
 export const NEGATIVES = [
+  "- 2026-10-30 10:00 · " + UUID_A + " · cloud · \"renters quote\" → insurance-renters-auto — compared options",
+  "KTN note for session " + UUID_B,
+  "member claim logged in " + UUID_B + " and " + UUID_A,
   "password=$DB_PASSWORD",
   "password: <your password>",
   "token: in the password manager under Progressive",

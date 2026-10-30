@@ -38,6 +38,8 @@ const CODE_CTX = new RegExp(
     ")\\b)?\\W{0,3}(?:" + ci("is") + "\\s+)?([A-Z0-9]{6,12})\\b",
   "g"
 );
+// A UUID (session ids, request ids) is never a policy or traveller number. Context rules see the line with UUIDs blanked.
+const UUID = /(?<![0-9A-Za-z])[0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}(?![0-9A-Za-z])/g;
 const ALNUM = /(?<![\w/.$])([A-Za-z0-9]{6,14})\b(?!\.[A-Za-z])/g;
 
 export function entropy(s) {
@@ -125,6 +127,8 @@ export function scanLine(line) {
       hits.push(["card-number", digits.length]);
     }
   }
+  // Context-based rules below look at the line with UUID-shaped tokens blanked out (same length, so offsets hold).
+  line = line.replace(UUID, (u) => " ".repeat(u.length));
   for (const m of line.matchAll(KTN_CTX)) {
     const end = m.index + m[0].length;
     const rest = line.slice(end, end + 60);
