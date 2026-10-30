@@ -40,6 +40,8 @@ const CODE_CTX = new RegExp(
 );
 // A UUID (session ids, request ids) is never a policy or traveller number. Context rules see the line with UUIDs blanked.
 const UUID = /(?<![0-9A-Za-z])[0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}(?![0-9A-Za-z])/g;
+// Stream Log headings carry the first 8 chars of a session id: "### 2026-10-30 · 3b2d8c71 · title". Same exemption.
+const SHORTID = /^(#{3} \d{4}-\d{2}-\d{2} · )([0-9a-f]{8})( · )/;
 const ALNUM = /(?<![\w/.$])([A-Za-z0-9]{6,14})\b(?!\.[A-Za-z])/g;
 
 export function entropy(s) {
@@ -129,6 +131,7 @@ export function scanLine(line) {
   }
   // Context-based rules below look at the line with UUID-shaped tokens blanked out (same length, so offsets hold).
   line = line.replace(UUID, (u) => " ".repeat(u.length));
+  line = line.replace(SHORTID, (_m, a, _b, c) => a + " ".repeat(8) + c);
   for (const m of line.matchAll(KTN_CTX)) {
     const end = m.index + m[0].length;
     const rest = line.slice(end, end + 60);
