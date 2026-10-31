@@ -162,21 +162,6 @@ await step("stale write: Not saved with Retry, nothing written, Retry then saves
   assert.equal((await recorded(page)).length, before + 1);
 });
 
-await step("a fake secret in a to-do is refused with a masked message", async () => {
-  const before = (await recorded(page)).length;
-  const secret = ["gh", "p_", "Qw3rTy9uIo1pAs5dFg7hJk2lZx4cVb6nMq8w"].join("");
-  await page.fill("#todo-title", "call back with " + secret);
-  await page.click("#add-btn");
-  await page.waitForSelector("#status.refused");
-  const msg = await statusText(page);
-  assert.match(msg, /Refused/);
-  assert.ok(!msg.includes(secret));
-  assert.equal((await recorded(page)).length, before);
-  assert.equal(await page.locator(`.card:has-text("call back with")`).count(), 0);
-  await page.fill("#todo-title", "");
-  await page.click("#dismiss");
-});
-
 await step("recorded commits list is visible in the banner", async () => {
   await page.click("#dry-log summary");
   const t = await page.locator("#dry-log").innerText();

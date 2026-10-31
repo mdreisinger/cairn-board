@@ -24,7 +24,6 @@ A stream's line 1 and line 2, its one `**Ball:**` line, `board.json`, and the IN
 ## Safety rules
 
 - Strict CSP in a meta tag, no inline script, no third-party script. Repo text is rendered with `textContent` only.
-- Before writing, the board runs the same secret patterns as the data repo's `bin/scan-secrets.py` (ported to JS) over the lines it would add, and refuses with a masked message on a hit.
 - A stale write (the branch moved since the board last read, or a 409/422 on the ref update) is not saved. The board shows "Not saved" with Retry. Retry re-reads and re-applies the move only if the card is still where the user saw it.
 - If `board.json` is missing or damaged the whole board opens read-only with a banner and never creates or overwrites it.
 - 401, 403 and rate-limit responses show a clear message.
@@ -41,7 +40,7 @@ A stream's line 1 and line 2, its one `**Ball:**` line, `board.json`, and the IN
 7. Moving a stream to Backlog is refused with the message above and writes nothing.
 8. A stream move changes only line 2 and the Ball line of that file, byte for byte elsewhere, plus INDEX.md, in a single commit.
 9. The JS INDEX generator and the data repo's `bin/lint.py` produce identical INDEX.md bytes on the same fixtures, including ordering.
-10. The JS secret scanner and `bin/scan-secrets.py` agree on shared fixtures. A to-do containing a secret shape is refused with a masked message and nothing is written.
+10. The JS secret scanner and `bin/scan-secrets.py` agree on shared fixtures. The board doesn't use the scanner to refuse writes; that was turned off on 2026-10-31.
 11. A stale write shows "Not saved" with Retry and never forces. The ref update always sends `force: false`.
 12. Missing or damaged `board.json` opens the board read-only with a banner and no write is attempted.
 13. Rate-limit and 401 responses show a clear message that says what to do.

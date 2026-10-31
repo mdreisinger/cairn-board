@@ -139,9 +139,7 @@ async function run(intent) {
     render();
   } catch (e) {
     state.busy = false;
-    if (e instanceof BoardError && e.kind === "secret") {
-      setStatus({ kind: "refused", text: e.message });
-    } else if (e instanceof BoardError && e.kind === "conflict") {
+    if (e instanceof BoardError && e.kind === "conflict") {
       setStatus({ kind: "error", text: notSaved(e), retry: () => retry(intent) });
     } else {
       const retryable = e instanceof BoardError && ["network", "api"].includes(e.kind);

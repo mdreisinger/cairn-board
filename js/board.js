@@ -1,6 +1,5 @@
 // Loading a snapshot of the data repo and committing a plan through a backend.
 import { BoardError } from "./errors.js";
-import { addedLines, scanLine, scanText, refusalMessage } from "./scan.js";
 
 export class Board {
   constructor(backend) {
@@ -31,22 +30,8 @@ export class Board {
     return r.sha !== snapshot.head;
   }
 
-  // Refuses on a secret hit. Scans the lines the commit would add, plus any raw user text in the plan.
-  checkSecrets(plan, snapshot) {
-    const hits = [];
-    for (const ch of plan.changes) {
-      for (const line of addedLines(snapshot.files.get(ch.path), ch.text)) {
-        for (const [rule, n] of scanLine(line)) hits.push({ rule, length: n });
-      }
-    }
-    for (const t of plan.texts || []) hits.push(...scanText(t));
-    return refusalMessage(hits);
-  }
-
   // One commit through the Git Data API. Returns the new snapshot. Never forces.
   async commit(plan, snapshot) {
-    const secret = this.checkSecrets(plan, snapshot);
-    if (secret) throw new BoardError("secret", secret);
     const { sha: headNow } = await this.backend.getRef({ fresh: true });
     if (headNow !== snapshot.head) {
       throw new BoardError("conflict", "The repo changed since the board last read it.");

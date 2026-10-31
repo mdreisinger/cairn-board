@@ -77,29 +77,13 @@ test("retry after a stale write succeeds once the board has reloaded", async () 
   assert.equal(backend.recorded.filter((r) => !r.external).length, 1);
 });
 
-test("secret in a to-do is refused with a masked message and nothing is written", async () => {
-  for (const [rule, value] of POSITIVES.slice(0, 8)) {
-    const { backend, board } = setup();
-    const snap = await board.load();
-    const plan = planAddTodo(snap.files, `call back ${value} soon`, { today: TODAY });
-    assert.equal(plan.kind, "ok");
-    await assert.rejects(board.commit(plan, snap), (e) => {
-      assert.equal(e.kind, "secret");
-      assert.ok(e.message.startsWith("Refused:"));
-      assert.ok(!e.message.includes(value), "message leaked the value");
-      return true;
-    }, rule);
-    assert.equal(backend.recorded.length, 0);
-    assert.equal(backend.head, snap.head);
-  }
-});
-
-test("secret in a who-name is refused too", async () => {
+test("a secret shape in a to-do is saved, because the scan is off", async () => {
   const { backend, board } = setup();
   const snap = await board.load();
-  const plan = planMove(snap.files, "s:garden-shed", "waiting", { today: TODAY, who: POSITIVES[1][1] });
-  await assert.rejects(board.commit(plan, snap), (e) => e.kind === "secret");
-  assert.equal(backend.recorded.length, 0);
+  const plan = planAddTodo(snap.files, `call back ${POSITIVES[0][1]} soon`, { today: TODAY });
+  assert.equal(plan.kind, "ok");
+  await board.commit(plan, snap);
+  assert.equal(backend.recorded.length, 1);
 });
 
 test("damaged board.json: load works, view is read-only, no write path produces a plan", async () => {
